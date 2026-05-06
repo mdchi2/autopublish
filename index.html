@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPublish Command Center</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <h1>AutoPublish <span>Bot</span></h1>
+                <p>Command Center & Monitoring Dashboard</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <span class="stat-label">Estado</span>
+                    <span class="stat-value" id="status-indicator">Inactivo</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Ciclos</span>
+                    <span class="stat-value" id="cycle-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="grid">
+                <!-- Panel de Control -->
+                <div class="card control-panel">
+                    <h2>Control</h2>
+                    <div class="timer-display" id="timer-display">
+                        02:30:00
+                    </div>
+                    <p class="timer-label">Próxima ejecución</p>
+                    <div class="controls">
+                        <button id="btn-toggle" class="btn primary">Iniciar Bot</button>
+                        <button id="btn-force" class="btn secondary">Ejecutar Ahora</button>
+                    </div>
+                </div>
+
+                <!-- Preview Actual -->
+                <div class="card preview-panel">
+                    <h2>Última Selección</h2>
+                    <div class="preview-content">
+                        <div class="preview-item">
+                            <h3>📺 YouTube</h3>
+                            <div class="media-box" id="yt-preview">
+                                <div class="placeholder">Esperando datos...</div>
+                            </div>
+                            <p id="yt-title" class="truncate">-</p>
+                            <a id="yt-link" href="#" target="_blank" class="hidden">Ver Video</a>
+                        </div>
+                        <div class="preview-item">
+                            <h3>📖 Versículo</h3>
+                            <div class="media-box" id="verse-preview">
+                                <div class="placeholder">Esperando datos...</div>
+                            </div>
+                            <p id="verse-title" class="truncate">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Log -->
+                <div class="card terminal-panel">
+                    <h2>System Log</h2>
+                    <div class="terminal" id="terminal">
+                        <div class="log-entry system">Sistema inicializado. Listo para comenzar.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
