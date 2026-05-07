@@ -15,7 +15,7 @@ const youtu = [
 const terminal = document.getElementById('terminal');
 const timerDisplay = document.getElementById('timer-display');
 const btnToggle = document.getElementById('btn-toggle');
-const btnForce = document.getElementById('btn-force');
+
 const statusIndicator = document.getElementById('status-indicator');
 const cycleCount = document.getElementById('cycle-count');
 
@@ -232,6 +232,7 @@ btnToggle.addEventListener('click', () => {
         statusIndicator.innerText = "Activo";
         statusIndicator.classList.add('active');
         log("Bot iniciado.", "system");
+        runRoutine();
         timerInterval = setInterval(tick, 1000);
     } else {
         btnToggle.innerText = "Iniciar Bot";
@@ -243,9 +244,7 @@ btnToggle.addEventListener('click', () => {
     }
 });
 
-btnForce.addEventListener('click', () => {
-    runRoutine();
-});
+
 
 // Init
 updateTimerDisplay();
