@@ -140,10 +140,32 @@ async function sendToInstagram(imageurl, titulo, link) {
             access_token: accesstoken
         });
 
-        const r2 = await fetch(posturl2, { method: 'POST', body: payload2 });
-        const res2 = await r2.json();
+        let res2;
+        let retries = 3;
+        let published = false;
 
-        if (res2.error) throw new Error(res2.error.message);
+        log("Instagram: Esperando a que Meta procese la imagen...", "info");
+
+        while (retries > 0 && !published) {
+            // Esperar 5 segundos para que los servidores de Meta descarguen y procesen la imagen
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            const r2 = await fetch(posturl2, { method: 'POST', body: payload2 });
+            res2 = await r2.json();
+
+            if (res2.error) {
+                // Código 90010 o mensaje específico significa que el contenedor no está listo
+                if (res2.error.code === 90010 || res2.error.message.includes("Media ID is not available")) {
+                    retries--;
+                    if (retries === 0) throw new Error(res2.error.message);
+                    log(`Instagram: Contenedor no listo, reintentando... (${retries} intentos restantes)`, "info");
+                } else {
+                    throw new Error(res2.error.message);
+                }
+            } else {
+                published = true;
+            }
+        }
         log("Instagram: publicado exitosamente", "success");
     } catch (error) {
         log(`Instagram Error: ${error.message}`, "error");
@@ -212,28 +234,36 @@ function updateTimerDisplay() {
     timerDisplay.innerText = formatTime(timeRemaining);
 }
 
-function tick() {
+async function tick() {
     if (!isRunning) return;
     
     timeRemaining--;
     updateTimerDisplay();
     
     if (timeRemaining <= 0) {
-        runRoutine();
+        clearInterval(timerInterval);
+        await runRoutine();
+        if (isRunning) {
+            timerInterval = setInterval(tick, 1000);
+        }
     }
 }
 
 // Events
-btnToggle.addEventListener('click', () => {
+btnToggle.addEventListener('click', async () => {
     isRunning = !isRunning;
     if (isRunning) {
         btnToggle.innerText = "Pausar Bot";
         btnToggle.classList.add('active');
         statusIndicator.innerText = "Activo";
         statusIndicator.classList.add('active');
-        log("Bot iniciado.", "system");
-        runRoutine();
-        timerInterval = setInterval(tick, 1000);
+        log("Bot iniciado. Ejecutando publicaciones...", "system");
+        
+        await runRoutine();
+        
+        if (isRunning) {
+            timerInterval = setInterval(tick, 1000);
+        }
     } else {
         btnToggle.innerText = "Iniciar Bot";
         btnToggle.classList.remove('active');
