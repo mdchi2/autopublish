@@ -112,8 +112,7 @@ header {
 
 .grid {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr;
     gap: 1.5rem;
 }
 
@@ -203,8 +202,6 @@ header {
 
 /* Preview Panel */
 .preview-panel {
-    grid-column: 2;
-    grid-row: 1;
 }
 
 .preview-content {
@@ -270,8 +267,6 @@ header {
 
 /* Terminal */
 .terminal-panel {
-    grid-column: 1 / -1;
-    grid-row: 2;
 }
 
 .terminal {

@@ -13,8 +13,6 @@ const youtu = [
 
 // DOM Elements
 const terminal = document.getElementById('terminal');
-const timerDisplay = document.getElementById('timer-display');
-const btnToggle = document.getElementById('btn-toggle');
 
 const statusIndicator = document.getElementById('status-indicator');
 const cycleCount = document.getElementById('cycle-count');
@@ -28,17 +26,9 @@ const verseTitle = document.getElementById('verse-title');
 
 // State
 let isRunning = false;
-let timeRemaining = 9000; // 2.5 hours in seconds
-let timerInterval = null;
 let cycles = 0;
 
 // Utility functions
-function formatTime(seconds) {
-    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${h}:${m}:${s}`;
-}
 
 function log(message, type = 'info') {
     const time = new Date().toLocaleTimeString('es-ES', { hour12: false });
@@ -223,58 +213,21 @@ async function runRoutine() {
     await sendToInstagram(verse.verenl, verse.vertit);
     
     log("Ciclo completado con éxito.", "success");
-    
-    // Reset Timer
-    timeRemaining = 9000;
-    updateTimerDisplay();
 }
 
-// Timer Management
-function updateTimerDisplay() {
-    timerDisplay.innerText = formatTime(timeRemaining);
+// Init & Start Bot Automatically
+async function startBot() {
+    isRunning = true;
+    statusIndicator.innerText = "Activo";
+    statusIndicator.classList.add('active');
+    log("Bot iniciado automáticamente. Ejecutando publicaciones...", "system");
+    
+    await runRoutine();
+    
+    isRunning = false;
+    statusIndicator.innerText = "Finalizado";
+    statusIndicator.classList.remove('active');
+    log("Ejecución única completada con éxito.", "system");
 }
 
-async function tick() {
-    if (!isRunning) return;
-    
-    timeRemaining--;
-    updateTimerDisplay();
-    
-    if (timeRemaining <= 0) {
-        clearInterval(timerInterval);
-        await runRoutine();
-        if (isRunning) {
-            timerInterval = setInterval(tick, 1000);
-        }
-    }
-}
-
-// Events
-btnToggle.addEventListener('click', async () => {
-    isRunning = !isRunning;
-    if (isRunning) {
-        btnToggle.innerText = "Pausar Bot";
-        btnToggle.classList.add('active');
-        statusIndicator.innerText = "Activo";
-        statusIndicator.classList.add('active');
-        log("Bot iniciado. Ejecutando publicaciones...", "system");
-        
-        await runRoutine();
-        
-        if (isRunning) {
-            timerInterval = setInterval(tick, 1000);
-        }
-    } else {
-        btnToggle.innerText = "Iniciar Bot";
-        btnToggle.classList.remove('active');
-        statusIndicator.innerText = "Pausado";
-        statusIndicator.classList.remove('active');
-        log("Bot pausado.", "system");
-        clearInterval(timerInterval);
-    }
-});
-
-
-
-// Init
-updateTimerDisplay();
+startBot();
