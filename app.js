@@ -56,30 +56,42 @@ function getVersiculo() {
 }
 
 async function fetchRandomYouTube() {
-    const j = Math.floor(Math.random() * youtu.length);
-    const feedUrl = youtu[j];
-    log(`Fetch: Canal YouTube random #${j}`);
-    
-    try {
-        // Using rss2json as a free CORS proxy for RSS feeds
-        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
-        const data = await response.json();
-        
-        if (data.status === 'ok' && data.items.length > 0) {
-            const i = Math.floor(Math.random() * Math.min(15, data.items.length));
-            const entry = data.items[i];
-            return {
-                title: entry.title,
-                link: entry.link,
-                thumbnail: entry.thumbnail
-            };
-        } else {
-            throw new Error("No items in feed");
-        }
-    } catch (error) {
-        log(`Error fetching YouTube: ${error.message}`, 'error');
-        return null;
+    // Generar una lista de índices y mezclarlos aleatoriamente para intentar con otros canales si alguno falla
+    const indices = Array.from({ length: youtu.length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
     }
+
+    for (const idx of indices) {
+        const feedUrl = youtu[idx];
+        log(`Fetch: Probando Canal YouTube #${idx}...`);
+        
+        try {
+            // Using rss2json as a free CORS proxy for RSS feeds
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+            const data = await response.json();
+            
+            if (data.status === 'ok' && data.items && data.items.length > 0) {
+                const i = Math.floor(Math.random() * Math.min(15, data.items.length));
+                const entry = data.items[i];
+                log(`Canal #${idx} obtenido con éxito!`, 'success');
+                return {
+                    title: entry.title,
+                    link: entry.link,
+                    thumbnail: entry.thumbnail
+                };
+            } else {
+                const errMsg = data.message || "No items in feed";
+                log(`Canal #${idx} falló: ${errMsg}. Probando otro...`, 'system');
+            }
+        } catch (error) {
+            log(`Canal #${idx} error: ${error.message}. Probando otro...`, 'system');
+        }
+    }
+    
+    log("Error fetching YouTube: Todos los canales fallaron", 'error');
+    return null;
 }
 
 // API Calls (Real)

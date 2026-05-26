@@ -18,8 +18,8 @@ while ($true) {
     Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Abriendo Google Chrome en pantalla completa..." -ForegroundColor Cyan
     Start-Process "chrome.exe" "--start-fullscreen https://mdchi2.github.io/autopublish/"
     
-    Write-Host "Esperando 30 segundos..."
-    Start-Sleep -Seconds 30
+    Write-Host "Esperando 300 segundos..."
+    Start-Sleep -Seconds 300
     
     Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Desconectando Wi-Fi..." -ForegroundColor Red
     netsh wlan disconnect | Out-Null
