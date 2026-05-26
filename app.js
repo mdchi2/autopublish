@@ -13,6 +13,8 @@ const youtu = [
 
 // DOM Elements
 const terminal = document.getElementById('terminal');
+const timerDisplay = document.getElementById('timer-display');
+const btnToggle = document.getElementById('btn-toggle');
 
 const statusIndicator = document.getElementById('status-indicator');
 const cycleCount = document.getElementById('cycle-count');
@@ -26,9 +28,17 @@ const verseTitle = document.getElementById('verse-title');
 
 // State
 let isRunning = false;
+let timeRemaining = 9000; // 2.5 hours in seconds
+let timerInterval = null;
 let cycles = 0;
 
 // Utility functions
+function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
 
 function log(message, type = 'info') {
     const time = new Date().toLocaleTimeString('es-ES', { hour12: false });
@@ -56,42 +66,30 @@ function getVersiculo() {
 }
 
 async function fetchRandomYouTube() {
-    // Generar una lista de índices y mezclarlos aleatoriamente para intentar con otros canales si alguno falla
-    const indices = Array.from({ length: youtu.length }, (_, i) => i);
-    for (let i = indices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
-
-    for (const idx of indices) {
-        const feedUrl = youtu[idx];
-        log(`Fetch: Probando Canal YouTube #${idx}...`);
-        
-        try {
-            // Using rss2json as a free CORS proxy for RSS feeds
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
-            const data = await response.json();
-            
-            if (data.status === 'ok' && data.items && data.items.length > 0) {
-                const i = Math.floor(Math.random() * Math.min(15, data.items.length));
-                const entry = data.items[i];
-                log(`Canal #${idx} obtenido con éxito!`, 'success');
-                return {
-                    title: entry.title,
-                    link: entry.link,
-                    thumbnail: entry.thumbnail
-                };
-            } else {
-                const errMsg = data.message || "No items in feed";
-                log(`Canal #${idx} falló: ${errMsg}. Probando otro...`, 'system');
-            }
-        } catch (error) {
-            log(`Canal #${idx} error: ${error.message}. Probando otro...`, 'system');
-        }
-    }
+    const j = Math.floor(Math.random() * youtu.length);
+    const feedUrl = youtu[j];
+    log(`Fetch: Canal YouTube random #${j}`);
     
-    log("Error fetching YouTube: Todos los canales fallaron", 'error');
-    return null;
+    try {
+        // Using rss2json as a free CORS proxy for RSS feeds
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+        const data = await response.json();
+        
+        if (data.status === 'ok' && data.items.length > 0) {
+            const i = Math.floor(Math.random() * Math.min(15, data.items.length));
+            const entry = data.items[i];
+            return {
+                title: entry.title,
+                link: entry.link,
+                thumbnail: entry.thumbnail
+            };
+        } else {
+            throw new Error("No items in feed");
+        }
+    } catch (error) {
+        log(`Error fetching YouTube: ${error.message}`, 'error');
+        return null;
+    }
 }
 
 // API Calls (Real)
@@ -225,21 +223,58 @@ async function runRoutine() {
     await sendToInstagram(verse.verenl, verse.vertit);
     
     log("Ciclo completado con éxito.", "success");
+    
+    // Reset Timer
+    timeRemaining = 9000;
+    updateTimerDisplay();
 }
 
-// Init & Start Bot Automatically
-async function startBot() {
-    isRunning = true;
-    statusIndicator.innerText = "Activo";
-    statusIndicator.classList.add('active');
-    log("Bot iniciado automáticamente. Ejecutando publicaciones...", "system");
-    
-    await runRoutine();
-    
-    isRunning = false;
-    statusIndicator.innerText = "Finalizado";
-    statusIndicator.classList.remove('active');
-    log("Ejecución única completada con éxito.", "system");
+// Timer Management
+function updateTimerDisplay() {
+    timerDisplay.innerText = formatTime(timeRemaining);
 }
 
-startBot();
+async function tick() {
+    if (!isRunning) return;
+    
+    timeRemaining--;
+    updateTimerDisplay();
+    
+    if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        await runRoutine();
+        if (isRunning) {
+            timerInterval = setInterval(tick, 1000);
+        }
+    }
+}
+
+// Events
+btnToggle.addEventListener('click', async () => {
+    isRunning = !isRunning;
+    if (isRunning) {
+        btnToggle.innerText = "Pausar Bot";
+        btnToggle.classList.add('active');
+        statusIndicator.innerText = "Activo";
+        statusIndicator.classList.add('active');
+        log("Bot iniciado. Ejecutando publicaciones...", "system");
+        
+        await runRoutine();
+        
+        if (isRunning) {
+            timerInterval = setInterval(tick, 1000);
+        }
+    } else {
+        btnToggle.innerText = "Iniciar Bot";
+        btnToggle.classList.remove('active');
+        statusIndicator.innerText = "Pausado";
+        statusIndicator.classList.remove('active');
+        log("Bot pausado.", "system");
+        clearInterval(timerInterval);
+    }
+});
+
+
+
+// Init
+updateTimerDisplay();
