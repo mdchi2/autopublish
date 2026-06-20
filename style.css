@@ -209,8 +209,10 @@ header {
 
 .preview-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 1.5rem;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .preview-item h3 {
@@ -320,9 +322,7 @@ header {
     .terminal-panel {
         grid-row: 3;
     }
-    .preview-content {
-        grid-template-columns: 1fr;
-    }
+
     header {
         flex-direction: column;
         gap: 1.5rem;
