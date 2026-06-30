@@ -196,10 +196,25 @@ async function runRoutine() {
     versePreview.innerHTML = `<img src="${verse.verenl}" alt="Versiculo">`;
     verseTitle.innerText = verse.vertit;
 
-    // 2. APIs
+    // 2. Format text for X with verse number and current short date/time
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const shortDate = `${day}/${month}/${year} ${hours}:${minutes}`;
+
+    let xText = verse.vertit;
+    if (!xText.includes('#')) {
+        xText = `${xText} #${verse.l}`;
+    }
+    xText = `${xText} - ${shortDate}`;
+
+    // 3. APIs
     await sendToInstagram(verse.verenl, verse.vertit);
     await sendToFacebook(verse.verenl, verse.vertit);
-    await sendToX(verse.verenl, verse.vertit);
+    await sendToX(verse.verenl, xText);
     
     log("Ciclo completado con éxito.", "success");
     
@@ -230,6 +245,7 @@ async function tick() {
 
 // Events
 btnToggle.addEventListener('click', async () => {
+    btnToggle.blur();
     isRunning = !isRunning;
     if (isRunning) {
         btnToggle.innerText = "Pausar Bot";
