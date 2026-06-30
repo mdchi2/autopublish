@@ -11,7 +11,7 @@ const verseTitle = document.getElementById('verse-title');
 
 // State
 let isRunning = false;
-let timeRemaining = 3600; // 1 hour in seconds
+let timeRemaining = 7200; // 2 hours in seconds
 let timerInterval = null;
 let cycles = 0;
 
@@ -130,6 +130,60 @@ async function sendToInstagram(imageurl, titulo, link) {
     }
 }
 
+async function sendToFacebook(imageUrl, message) {
+    try {
+        const pageId = "710763425767908";
+        const version = 'v21.0';
+        const accesstoken = "EAANJx5gaetABO3hQzqWqd7kSDNfk7pdWOpm8EFpPHKxd3hXnWeSwP5azYyvW122euJZBIJ79HsRbp829TWZATBNmBpgGmKi92lMiaThY475e7koBVsXAZCrzrc8tnmzFOfvVMUZB2YQ1l3PlzPrTOyGLyZAzugEXk1QyHXhEqRt6BViRBEVYJVW566L9ZBACP6SZBM9QmLr";
+
+        // Paso 1: Obtener el Page Access Token usando el User Access Token
+        const tokenUrl = `https://graph.facebook.com/${version}/${pageId}?fields=access_token&access_token=${accesstoken}`;
+        const tokenResponse = await fetch(tokenUrl);
+        const tokenData = await tokenResponse.json();
+        
+        if (tokenData.error) throw new Error(tokenData.error.message);
+        const pageAccessToken = tokenData.access_token;
+
+        // Paso 2: Publicar la foto en la página de Facebook
+        const postUrl = `https://graph.facebook.com/${version}/${pageId}/photos`;
+        const payload = new URLSearchParams({
+            url: imageUrl,
+            caption: message,
+            access_token: pageAccessToken
+        });
+
+        const postResponse = await fetch(postUrl, {
+            method: 'POST',
+            body: payload
+        });
+        const postData = await postResponse.json();
+
+        if (postData.error) throw new Error(postData.error.message);
+        log("Facebook: publicado exitosamente", "success");
+    } catch (error) {
+        log(`Facebook Error: ${error.message}`, "error");
+    }
+}
+
+async function sendToX(imageUrl, message) {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/x', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_url: imageUrl, text: message })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Error al enviar a X");
+        }
+        
+        log("X (Twitter): publicado exitosamente", "success");
+    } catch (error) {
+        log(`X (Twitter) Error: ${error.message}`, "error");
+    }
+}
+
 // Main Routine
 async function runRoutine() {
     log("Iniciando ciclo de publicación...", "info");
@@ -144,11 +198,13 @@ async function runRoutine() {
 
     // 2. APIs
     await sendToInstagram(verse.verenl, verse.vertit);
+    await sendToFacebook(verse.verenl, verse.vertit);
+    await sendToX(verse.verenl, verse.vertit);
     
     log("Ciclo completado con éxito.", "success");
     
     // Reset Timer
-    timeRemaining = 3600;
+    timeRemaining = 7200;
     updateTimerDisplay();
 }
 
