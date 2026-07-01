@@ -184,6 +184,26 @@ async function sendToX(imageUrl, message) {
     }
 }
 
+async function sendToLinkedIn(imageUrl, message) {
+    try {
+        log("LinkedIn: iniciando publicación de imagen...", "info");
+        const response = await fetch('http://127.0.0.1:5000/api/linkedin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_url: imageUrl, text: message })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Error al enviar a LinkedIn");
+        }
+        
+        log("LinkedIn: publicado exitosamente", "success");
+    } catch (error) {
+        log(`LinkedIn Error: ${error.message}`, "error");
+    }
+}
+
 // Main Routine
 async function runRoutine() {
     log("Iniciando ciclo de publicación...", "info");
@@ -212,6 +232,7 @@ async function runRoutine() {
     await sendToInstagram(verse.verenl, cleanTitle);
     await sendToFacebook(verse.verenl, cleanTitle);
     await sendToX(verse.verenl, xText);
+    await sendToLinkedIn(verse.verenl, xText);
     
     log("Ciclo completado con éxito.", "success");
     
