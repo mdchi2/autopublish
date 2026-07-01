@@ -205,15 +205,12 @@ async function runRoutine() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const shortDate = `${day}/${month}/${year} ${hours}:${minutes}`;
 
-    let xText = verse.vertit;
-    if (!xText.includes('#')) {
-        xText = `${xText} #${verse.l}`;
-    }
-    xText = `${xText} - ${shortDate}`;
+    const cleanTitle = verse.vertit.replace(/versículo/gi, '').replace(/#\d+/g, '').trim();
+    const xText = cleanTitle ? `${cleanTitle} - ${shortDate}` : shortDate;
 
     // 3. APIs
-    await sendToInstagram(verse.verenl, verse.vertit);
-    await sendToFacebook(verse.verenl, verse.vertit);
+    await sendToInstagram(verse.verenl, cleanTitle);
+    await sendToFacebook(verse.verenl, cleanTitle);
     await sendToX(verse.verenl, xText);
     
     log("Ciclo completado con éxito.", "success");
