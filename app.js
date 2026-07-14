@@ -11,11 +11,17 @@ const verseTitle = document.getElementById('verse-title');
 
 // State
 let isRunning = false;
-let timeRemaining = 7200; // 2 hours in seconds
+let timeRemaining = getRandomInterval();
 let timerInterval = null;
 let cycles = 0;
 
 // Utility functions
+function getRandomInterval() {
+    const min = 7200;  // 2 horas en segundos (7200s)
+    const max = 14400; // 4 horas en segundos (14400s)
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function formatTime(seconds) {
     const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
     const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
@@ -237,7 +243,9 @@ async function runRoutine() {
     log("Ciclo completado con éxito.", "success");
     
     // Reset Timer
-    timeRemaining = 7200;
+    timeRemaining = getRandomInterval();
+    const formatted = formatTime(timeRemaining);
+    log(`Próxima ejecución programada en: ${formatted}`, "info");
     updateTimerDisplay();
 }
 
