@@ -186,23 +186,25 @@ def post_to_linkedin_pyautogui(image_data, text=None):
             temp_img_path = os.path.abspath(temp_file.name)
         print(f"Imagen temporal guardada en: {temp_img_path}")
 
-        # b) Abrir el link https://www.linkedin.com/sharing/compose y esperar 40 segundos
+        # b) Abrir el link https://www.linkedin.com/sharing/compose y esperar 50 segundos
         url_linkedin = "https://www.linkedin.com/sharing/compose"
         print(f"Abriendo LinkedIn: {url_linkedin}")
         webbrowser.open(url_linkedin)
-        print("Esperando 40 segundos para que cargue LinkedIn...")
-        time.sleep(40)
+        print("Esperando 50 segundos para que cargue LinkedIn...")
+        time.sleep(50)
 
         # Asegurar enfoque del navegador
         focus_browser()
         time.sleep(0.5)
 
-        # c) Presionar 7 veces la tecla tab y presionar la tecla enter
+        # c) Presionar 7 veces la tecla tab, presionar la tecla enter y esperar 20 segundos
         print("Presionando 7 veces tab y enter...")
         for _ in range(7):
             pyautogui.press('tab')
             time.sleep(0.2)
         pyautogui.press('enter')
+        print("Esperando 20 segundos...")
+        time.sleep(20)
 
         # d) Pegar la ruta del archivo temporal, presionar enter y esperar 30 segundos
         print(f"Pegando ruta del archivo temporal ({temp_img_path})...")
