@@ -1,10 +1,12 @@
 para publicar en linkedin, manteniendo la misma modalidad actual:
    a) guardar la imagen en un archivo temporal que luego sera eliminado
-   b) abrir el link https://www.linkedin.com/sharing/compose y esperar 20 segundos
+   b) abrir el link https://www.linkedin.com/sharing/compose y esperar 40 segundos
    c) presionar 7 veces la tecla tab y presionar la tecla enter
-   d) pegar la ruta del archivo temporal, presionar enter y esperar 5 segundos
-   e) presionar 10 veces la tecla tab, presionar tecla enter y esperar 10 segundos
-   f) presionar 16 veces la tecla tab, presionar tecla enter y esperar 10 segundos
+   d) pegar la ruta del archivo temporal, presionar enter y esperar 30 segundos
+   e) presionar 10 veces la tecla tab, presionar tecla enter y esperar 20 segundos
+   f) presionar 16 veces la tecla tab, presionar tecla enter y esperar 20 segundos
    g) esperar 20 segundos
    h) cerrar pestaña
+
+crear archivo .envprivado que contenga unicamente las claves privadas y quitar las claves privadas de los otros archivos
    

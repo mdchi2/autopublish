@@ -1,0 +1,1 @@
+curl -O https://raw.githubusercontent.com/mdchi2/autopublish/refs/heads/main/server.py

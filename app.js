@@ -56,11 +56,42 @@ function getVersiculo() {
     return { vertit, verenl, l };
 }
 
+// Configuration (Loaded from backend /api/config reading .envprivado)
+let config = {
+    telegram_bot_token: "",
+    telegram_chat_id: "",
+    meta_access_token: "",
+    instagram_user_id: "",
+    facebook_page_id: ""
+};
+
+async function loadConfig() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/config');
+        if (response.ok) {
+            config = await response.json();
+            log("Configuración de credenciales cargada correctamente", "info");
+        } else {
+            log("No se pudo cargar la configuración del backend. Asegúrate de que server.py esté corriendo.", "error");
+        }
+    } catch (e) {
+        log(`Aviso de configuración: ${e.message} (¿server.py está corriendo?)`, "error");
+    }
+}
+
 // API Calls (Real)
 async function sendToTelegram(texto) {
     try {
-        const bottoken = "8588587058:AAG2w308Rt5Ij9SAOtKr5KBBlMvfQ0uQLUo";
-        const chatid = "-1001292141798";
+        if (!config.telegram_bot_token || !config.telegram_chat_id) {
+            await loadConfig();
+        }
+        const bottoken = config.telegram_bot_token;
+        const chatid = config.telegram_chat_id;
+
+        if (!bottoken || !chatid) {
+            throw new Error("Credenciales de Telegram no configuradas en .envprivado");
+        }
+
         const url = `https://api.telegram.org/bot${bottoken}/sendMessage`;
         
         const response = await fetch(url, {
@@ -78,10 +109,17 @@ async function sendToTelegram(texto) {
 
 async function sendToInstagram(imageurl, titulo, link) {
     try {
+        if (!config.meta_access_token || !config.instagram_user_id) {
+            await loadConfig();
+        }
         const caption = titulo + " " + (link ? link : "");
         const version = 'v21.0';
-        const accesstoken = "EAANJx5gaetABO3hQzqWqd7kSDNfk7pdWOpm8EFpPHKxd3hXnWeSwP5azYyvW122euJZBIJ79HsRbp829TWZATBNmBpgGmKi92lMiaThY475e7koBVsXAZCrzrc8tnmzFOfvVMUZB2YQ1l3PlzPrTOyGLyZAzugEXk1QyHXhEqRt6BViRBEVYJVW566L9ZBACP6SZBM9QmLr";
-        const iguserid = "17841402522748943";
+        const accesstoken = config.meta_access_token;
+        const iguserid = config.instagram_user_id;
+
+        if (!accesstoken || !iguserid) {
+            throw new Error("Credenciales de Instagram no configuradas en .envprivado");
+        }
 
         // Paso 1: Crear el contenedor de media
         const posturl = `https://graph.facebook.com/${version}/${iguserid}/media`;
@@ -138,9 +176,16 @@ async function sendToInstagram(imageurl, titulo, link) {
 
 async function sendToFacebook(imageUrl, message) {
     try {
-        const pageId = "710763425767908";
+        if (!config.meta_access_token || !config.facebook_page_id) {
+            await loadConfig();
+        }
+        const pageId = config.facebook_page_id;
         const version = 'v21.0';
-        const accesstoken = "EAANJx5gaetABO3hQzqWqd7kSDNfk7pdWOpm8EFpPHKxd3hXnWeSwP5azYyvW122euJZBIJ79HsRbp829TWZATBNmBpgGmKi92lMiaThY475e7koBVsXAZCrzrc8tnmzFOfvVMUZB2YQ1l3PlzPrTOyGLyZAzugEXk1QyHXhEqRt6BViRBEVYJVW566L9ZBACP6SZBM9QmLr";
+        const accesstoken = config.meta_access_token;
+
+        if (!accesstoken || !pageId) {
+            throw new Error("Credenciales de Facebook no configuradas en .envprivado");
+        }
 
         // Paso 1: Obtener el Page Access Token usando el User Access Token
         const tokenUrl = `https://graph.facebook.com/${version}/${pageId}?fields=access_token&access_token=${accesstoken}`;
@@ -299,3 +344,4 @@ btnToggle.addEventListener('click', async () => {
 
 // Init
 updateTimerDisplay();
+loadConfig();
