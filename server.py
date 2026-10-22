@@ -197,9 +197,9 @@ def post_to_linkedin_pyautogui(image_data, text=None):
         focus_browser()
         time.sleep(0.5)
 
-        # c) Presionar 7 veces la tecla tab, presionar la tecla enter y esperar 20 segundos
-        print("Presionando 7 veces tab y enter...")
-        for _ in range(7):
+        # c) Presionar 2 veces la tecla tab, presionar la tecla enter y esperar 20 segundos
+        print("Presionando 2 veces tab y enter...")
+        for _ in range(2):
             pyautogui.press('tab')
             time.sleep(0.2)
         pyautogui.press('enter')
